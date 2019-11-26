@@ -1,0 +1,28 @@
+---
+title: "Unit1 Assignment DDS 6306"
+author: "Suchismita Moharana"
+date: "11/24/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)  ##message = FALSE, warning = FALSE)
+library(ggplot2)
+```
+
+
+```{r fig.cap = "Suchismita's Data Science Profile"}
+dfprofile = data.frame(subject = c("Data Viz","Machine Learning","Maths","Statistics",
+                                   "Comp.Science","Communication","Domain Expertise"), score = c(7,1,6,5,7,6,8))
+
+barplot(dfprofile$score, names.arg = dfprofile$subject, xlab="Areas of Data Science", ylab="Score", main = "My Data Science Profile", )
+
+
+```
+
+
+```{r pressure, echo=FALSE, r fig.cap = "Suchismita's Data Science Profile"}
+
+```
+
+

@@ -1,0 +1,114 @@
+---
+title: "Unit5 Assignment DDS 6306"
+author: "Suchismita Moharana"
+date: "09/28/2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+library(plotly)
+```
+
+## Use the PlayerBBall.csv dataset to visually represent (summarize) the number of players in each position. 
+
+Below bar chart shows the count in each category of position for the basketball player dataset.
+
+```{r}
+df_baseball_players <- read.csv("PlayersBBall.csv")
+df_baseball_players %>% ggplot(mapping = aes (x=position)) + geom_bar()
+```
+
+## Use the dataset to visually investigate the distribution of the weight of centers (C) is greater than the distribution of the weight of forwards (F)
+
+As shown in the Geom Point bar below, the distribution of the weight of centers (C) is greater than the distribution of the weight of forwards (F).
+
+```{r}
+#df_baseball_players %>% ggplot(mapping = aes (x=position, y=weight)) + geom_point()
+subset(df_baseball_players, position == "C" | position == "F" ) %>% ggplot(mapping = aes (x=position, y=weight)) + geom_point()
+```
+
+
+## Use the dataset to visually investigate if the distribution of the height of centers (C) is greater than the distribution of the height of forwards (F).
+
+As shown in the Geom Point bar below, the distribution of the height of centers (C) is greater than the distribution of the height of forwards (F).
+
+```{r}
+height_in_inches = (as.numeric(substr(df_baseball_players$height,1,1)) * 12) + as.numeric( substr(df_baseball_players$height,3,4))
+  
+df_baseball_players1 = cbind(df_baseball_players,height_in_inches)
+
+subset(df_baseball_players1, position == "C" | position == "F" ) %>% ggplot(mapping = aes (x=position, y=height_in_inches)) + geom_point() + xlab("Player Position") + ylab("Player Height in Inches")
+```
+
+## Use the dataset to visually investigate if the distribution of height is different between any of the positions.
+
+As shown in the geom point bar below, distribution of height is different for different positions. However, it is almost similar for category F-G and G-F. And for C-F and F-C. We are keeping the tallest as Centers and the shortest as Guards.
+
+```{r}
+df_baseball_players1 %>% ggplot(mapping = aes (x=position, y=height_in_inches)) + geom_point() + xlab("Player's Position") + ylab("Player's Height in Inches")
+```
+
+
+## Use the dataset to investigate how the player’s height is related to the player’s weight. How does height change as the weight changes?  
+
+There is a positive co-relation between height and weight as indicated by the below graph. Weight incraeses with increae in Height.
+
+```{r}
+df_baseball_players1 %>% ggplot(mapping = aes (x = weight, y = height_in_inches) ) + geom_point() + xlab("Player Weight") + ylab("Player Height in Inches") + ggtitle ("Relationship between Player Height vs Player Weight") 
+```
+
+
+## Is their any difference in the relationship between height and weight between positions?  Are height and weight related differently for different positions.
+
+Players with highest height and weight are placed as Centers. Players with lowest height and weight are placed as Guards.
+
+```{r}
+ggplot(data=df_baseball_players1)+geom_point(mapping = aes(x=weight, y=height_in_inches,color = position)) + xlab("Player Weight") + ylab("Player Height in Inches")  
+```
+
+## A historian would like to investigate the claim that the heights of players have increased over the years.  Analyze this claim graphically / visually. 
+
+It does not look like Player's height significantly increased over the years. The below graph shows it almost stayed constant.
+
+```{r}
+
+dt_birth_date <- as.Date(factor(df_baseball_players1$birth_date), "%B %d, %Y")
+df_baseball_players2 = cbind(df_baseball_players1,dt_birth_date)
+
+df_baseball_players2 %>% ggplot(mapping = aes (x = dt_birth_date, y = height_in_inches) ) + geom_point() + xlab("Player's year of Birth") + ylab("Player Height in Inches") + ggtitle ("Relationship between Player Height vs Player's Year of Birth") 
+```
+
+
+## Create a 3D plot of height vs. weight vs. year and color code the points by position.  
+
+```{r}
+p <- plot_ly(df_baseball_players2, x = ~height_in_inches, y = ~weight, z = ~dt_birth_date, color = ~position) %>% add_markers() %>% layout(scene = list(xaxis = list(title = "Player's Height in Inches"), yaxis = list(title = "Weight"), zaxis = list(title = "Year")))
+
+p
+```
+
+
+## Go to this website and use one of the 50 best plots to visualize some aspect of the data and provide at least one insight. http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
+
+I am using box plot to find out the relationship between Player's position and height in Inches.
+
+```{r}
+df_baseball_players2 %>% ggplot(mapping = aes (x = position, y = height_in_inches)) + geom_boxplot() + xlab("Player Weight") + ylab("Player Height in Inches") + ggtitle ("Relationship between Player Height vs Player Weight (Box Plot)") 
+```
+
+
+## Visually test the claim that the distribution of incomes increase (mean or median) as the education level rises. 
+
+
+```{r}
+df_education_income <- read.csv("Education_Income.csv")
+
+df_education_income %>% ggplot(mapping = aes (x = Educ, y = Income2005)) + geom_boxplot() + xlab("Years of Education") + ylab("Income Range")  + ggtitle("Income Range for Americans")
+
+```
+
+
+This concludes Unit-2 assignment.

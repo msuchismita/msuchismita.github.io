@@ -1,20 +1,69 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Suchismita Moharana Developer Profile</title>
-<h1>Welcome to Suchismita Moharana's developer profile</h1>
-</head>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			.tab {
+			  overflow: hidden;
+			  border: 1px solid #ccc;
+			  background-color: #f1f1f1;
+			}
+
+			.tab button {
+			  background-color: inherit;
+			  float: left;
+			  border: 1px solid #ccc;
+			  outline: none;
+			  cursor: pointer;
+			  padding: 14px 16px;
+			  transition: 0.3s;
+			  font-size: 17px;
+			}
+
+			.tab button:hover {
+			  background-color: #ddd;
+			}
+
+			.tab button.active {
+			  background-color: #ccc;
+			}
+
+			.tabcontent {
+			  padding: 6px 12px;
+			  border: 1px solid #ccc;
+			  border-top: none;
+			}
+		</style>
+	</head>
 
 
-<body>
+	<body>
+		<h1>Welcome to Suchismita Moharana's developer profile</h1>
 
-<p>
-  Hi There, My name is Suchismita Moharana.
-  I am currently working as a Data Warehouse Engineer with Quest Global Engineering Services Pvt Ltd. and working on a project for one of the biggest consumer electronics company.
-  
-  In my free time, I love to do yoga, running.
-</p>
-
-</body>
-
+		<script>
+		function myFunction() {
+		document.getElementById("demo").innerHTML = "Hello Dear Visitor!</br> We are happy that you've chosen our website to learn programming languages. We're sure you'll become one of the best programmers in your country. Good luck to you!";
+		}
+		</script>
+		<div class="tab">
+			<button onclick="myFunction('About Me')" id="defaultOpen">About Me</button>
+			<button onclick="myFunction('My Work')">My Work</button>
+		</div>
+		<div id="About Me">
+			<h3>About Me</h3>
+			<p>  Hi There, My name is Suchismita Moharana.
+			I am currently working as a Data Warehouse Engineer with Quest Global Engineering Services Pvt Ltd. and working on a project for one of the biggest consumer electronics company.
+			In my free time, I love to do yoga, running.
+			<br>
+			<br>
+			The other tabs are having details of the data analysis I have done so far.
+			</p>
+		</div>
+		<div id="My Work">
+			<h3>My Work</h3>
+			<p>I have worked on below projects.
+			https://github.com/msuchismita/DDS_CaseStudy1
+			</p> 
+		</div>
+	</body>
 </html>

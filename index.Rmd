@@ -4,3 +4,9 @@ output: html_document
 ---
 
 My Name is Suchismita Moharana and welcome to my developer profile.
+I am currently doing MS in Data Science in SMU. Anticipated completion is Dec 2021.
+This page is having the case studies and assignments that I have done as part of this graduate course.
+
+Please check them out which are arranged in different tabs.
+
+Also please check out the Shiny App that I have deployed on https://msuchismita.shinyapps.io/My_First_Shiny_App/

@@ -1,10 +1,15 @@
 ---
+title: "About Me"
 output: html_document
 ---
 
 
 
-I am currently doing MS in Data Science in SMU. Anticipated completion is Dec 2021.
-This page is having the case studies and assignments that I have done as part of this graduate course.
+Current Role: Datawarehouse Engineer at Quest Global Engineering Services Pvt Ltd.
 
-Please check them out which are arranged in different tabs!!!
+Current City: Austin, Texas
+
+Education: Master of Science in Data Science (on-going)
+           Bachelor of Technology in Computer Science and Engineering (2010)
+           
+Hobbies: Running, Yoga

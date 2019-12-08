@@ -1,6 +1,5 @@
 ---
-title: "My Developer Page"
-author: "Suchismita Moharana"
+title: "Suchismita Moharana"
 output: html_document
 ---
 

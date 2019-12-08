@@ -189,4 +189,5 @@ In my opinion, attrition is directly dependent on low income, working over time 
 The posterior probability says, the attrition rate would be high for those employees who are in low income group (like Sales Representative) doing overtime and who Travel frequently.
 
 
+We have a presentation of this report in https://youtu.be/c8dK0_q4g3I
 

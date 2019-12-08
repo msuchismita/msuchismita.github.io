@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Suchismita Moharana and Andy Walch" />
+
+<meta name="date" content="2019-10-11" />
+
+<title>DDS 6306 : Case Study 1</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">My Developer Page</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Suchismita_Moharana_CaseStudy2.html">Case Study 2</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">DDS 6306 : Case Study 1</h1>
+<h4 class="author">Suchismita Moharana and Andy Walch</h4>
+<h4 class="date">October 11, 2019</h4>
+
+</div>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>In this report, we explore <code>beers</code> and <code>breweries</code> datasets for the 51 states in the US. The steps and procedures taken in this analysis are stipulated below. We successfully merged the two datasets <code>Beers</code> dataset which contains a list of 2410 US craft beers to the <code>Breweries</code> dataset containing 558 US breweries.</p>
+</div>
+<div id="analysis-questions" class="section level3">
+<h3>Analysis Questions</h3>
+<p>In this section, we address the research questions put together on these two datasets. The questions are numbered 1 to 7.</p>
+<div id="how-many-breweries-are-present-in-each-state" class="section level4">
+<h4>1. How many breweries are present in each state?</h4>
+<p>We answer this question by using <code>count</code> function in base to count the number of breweries grouped by “state”. This creates a dataframe named <code>df_count</code> with two columns <code>State</code> which is the State name and <code>Breweries</code> which is the number of breweries in a given state. Each row represents one State. Colorado has the highest number of breweries {47} where as Washington DC, South Dakota (SD), North Dakota (ND), and West Virginia (WV) tie for the least amount of breweries each with just 1.</p>
+<p><img src="Suchismita_Moharana_CaseStudy1_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="merge-beer-data-with-breweries-data-by-brewery-id.-print-ﬁrst-6-observations-and-the-last-six-observations-to-check-the-merged-ﬁle." class="section level4">
+<h4>2. Merge beer data with breweries data by brewery id. Print ﬁrst 6 observations and the last six observations to check the merged ﬁle.</h4>
+<p>we merge <code>df_beers</code> and <code>df_breweries</code> dataframes by <code>Brewery_ID</code> using merge command for base R and assign the new dataframe to <code>df_breweries_and_beer</code>. We use <code>head()</code> and <code>tail()</code> to print the first and last 6 rows of the newly created <code>df_breweries_and_beer</code> dataframe respectively.</p>
+</div>
+<div id="address-the-missing-values-in-each-column." class="section level4">
+<h4>3. Address the missing values in each column.</h4>
+<p>As shown in the code block below returns the summary of the number of NA’s per column. International Bitterness Units of beer (IBU) has the highest number of NA’s of all the available variables which is 1005.</p>
+<pre><code>## [1] &quot;Brew_ID : 0&quot;
+## [1] &quot;BeerName : 0&quot;
+## [1] &quot;Beer_ID : 0&quot;
+## [1] &quot;ABV : 62&quot;
+## [1] &quot;IBU : 1005&quot;
+## [1] &quot;Style : 0&quot;
+## [1] &quot;Ounces : 0&quot;
+## [1] &quot;BreweryName : 0&quot;
+## [1] &quot;City : 0&quot;
+## [1] &quot;State : 0&quot;</code></pre>
+</div>
+<div id="compute-the-median-alcohol-content-and-international-bitterness-unit-for-each-state.-plot-a-bar-chart-to-compare." class="section level4">
+<h4>4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.</h4>
+<p>This code block then computes the median alcohol content(ABV) per state and stores the result in vector <code>abv</code>. It also computes median International Bitterness Units of the beer (IBU) and stores the result in <code>ibu</code>. Then plots a grid bar charts to comparing median ABV and median IBU in each of the 51 States.</p>
+<p><img src="Suchismita_Moharana_CaseStudy1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="which-state-has-the-maximum-alcoholic-abv-beer-which-state-has-the-most-bitter-ibu-beer" class="section level4">
+<h4>5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?</h4>
+<p>In this code block, we identify Colorado (CO) as the State with the maximum alcoholic beer with an <code>ABV</code> of <em>0.128</em> and Oregon (OR) as the state with the most bitter beer with an <code>IBU</code> of <em>138</em>.</p>
+<pre><code>## [1] &quot;The state with the beer with maximum alcohol is -&gt; CO with an ABV of 0.128&quot;</code></pre>
+<pre><code>## [1] &quot;The state with Most bitter beer is -&gt; OR with IBU of 138&quot;</code></pre>
+</div>
+<div id="comment-on-the-summary-statistics-and-distribution-of-the-abv-variable." class="section level4">
+<h4>6. Comment on the summary statistics and distribution of the ABV variable.</h4>
+<p>To get the summary statistics of ABV by Volume variable, we are using summary function. <img src="Suchismita_Moharana_CaseStudy1_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="is-there-an-apparent-relationship-between-the-bitterness-of-the-beer-and-its-alcoholic-content-draw-a-scatter-plot.-make-your-best-judgment-of-a-relationship-and-explain-your-answer." class="section level4">
+<h4>7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot. Make your best judgment of a relationship and EXPLAIN your answer.</h4>
+<p>There is a positive correlation between <code>ABV</code> and <code>IBU</code> as shown in the regression trend line in the scatter plot below. <code>IBU</code> increases with an increase in <code>ABV</code>.</p>
+<p><img src="Suchismita_Moharana_CaseStudy1_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

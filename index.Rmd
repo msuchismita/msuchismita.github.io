@@ -1,5 +1,5 @@
 ---
-title: "myDeveloperProfile"
+title: "My Developer Profile"
 author: "Suchismita Moharana"
 date: "12/7/2019"
 output: html_document

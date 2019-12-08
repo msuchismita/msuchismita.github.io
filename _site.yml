@@ -4,7 +4,7 @@ navbar:
   left:
     - text: "About Me"
       href: About_Me.html      
-    - text: "Case Study 1"
+    - text: "Case Study on Beers and Breweries"
       href: Suchismita_Moharana_CaseStudy1.html
-    - text: "Case Study 2"
+    - text: "Case Study on Employee Attrition"
       href: Suchismita_Moharana_CaseStudy2.html

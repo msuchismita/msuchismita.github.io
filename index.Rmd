@@ -1,0 +1,13 @@
+---
+title: "myDeveloperProfile"
+author: "Suchismita Moharana"
+date: "12/7/2019"
+output: html_document
+---
+
+# Simple yet awesome website
+## note: the first 6 lines are YAML tags
+### we will knit to a html file
+ Then push index.html to github.io repo
+ 
+ 

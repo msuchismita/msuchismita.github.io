@@ -1,11 +1,9 @@
 name: "my-website"
 navbar:
-  title: "Suchismita"
+  title: "Home"
   left:
-    - text: "Home"
-      href: index.html
     - text: "About Me"
-      href: Suchismita_Moharana_CaseStudy2.html      
+      href: About_Me.html      
     - text: "Case Study 1"
       href: Suchismita_Moharana_CaseStudy1.html
     - text: "Case Study 2"

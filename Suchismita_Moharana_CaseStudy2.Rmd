@@ -24,6 +24,8 @@ library(recipes)
 
 This report is to analyse data for existing employees of a company to find the reason of employee turnovers. Also, we will talk about interesting trends that we see in employee data.
 
+I have a presentation of this report in https://youtu.be/c8dK0_q4g3I
+
 ```{r}
 #reading datafile and putting into dataframe
 
@@ -187,7 +189,4 @@ MeanAcc
 In my opinion, attrition is directly dependent on low income, working over time and more work related travel.
 
 The posterior probability says, the attrition rate would be high for those employees who are in low income group (like Sales Representative) doing overtime and who Travel frequently.
-
-
-We have a presentation of this report in https://youtu.be/c8dK0_q4g3I
 

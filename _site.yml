@@ -8,3 +8,7 @@ navbar:
       href: Suchismita_Moharana_CaseStudy1.html
     - text: "Case Study on Employee Attrition"
       href: Suchismita_Moharana_CaseStudy2.html
+    - text: "Machine Learning I"
+      href: ML1.html      
+    - text: "Time Series Analysis"
+      href: Moharana_Timeseries_final_Project.html

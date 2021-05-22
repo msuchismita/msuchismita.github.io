@@ -1,0 +1,419 @@
+---
+title: "Time Series Project"
+author: "Suchismita Moharana"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tswge)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(naniar)
+library(nnfor)
+library(ezplot)
+library(lubridate)  
+library(vars)
+
+```
+
+
+
+## Overview and Dataset Description
+
+The analysis here is on dataset of hourly Interstate 94 Westbound traffic volume for MN DoT ATR station 301, roughly midway between Minneapolis, MN and St Paul, MN. This dataset was taken from https://archive.ics.uci.edu/ml/datasets/Metro+Interstate+Traffic+Volume . This analysis will help in better urban planning, maintenance planning, lowering congestion level and increasing driver safety by forecasting the traffic volume for a future timeframe. 
+
+*Column Names: Datatype: Meanings*
+
+- holiday: Categorical: US National holidays plus regional holiday, Minnesota State Fair 
+- temp: Numeric: Average temp in kelvin 
+- rain_1h: Numeric: Amount in mm of rain that occurred in the hour 
+- snow_1h: Numeric: Amount in mm of snow that occurred in the hour 
+- clouds_all: Numeric: Percentage of cloud cover 
+- weather_main: Categorical: Short textual description of the current weather 
+- weather_description: Categorical: Longer textual description of the current weather 
+- date_time: DateTime: Hour of the data collected in local CST time 
+- traffic_volume: Numeric: Hourly I-94 ATR 301 reported westbound traffic volume
+
+
+The available data is hourly from 2nd Oct 2012 to 30th Sep 2018. So, we have hourly data for 6 years. While we will analyse old years data for traffic patern, we will mostly use last 1-2 years data (2016 Oct to 2018 Sep) for our forecast.
+
+
+```{r  Reading datafile}
+###Reading datafile
+set.seed(1)
+
+traffic_volume_raw = read.csv("/Users/suchismitamoharana/Documents/GitHub/Timeseries_Term_Project/data/Metro_Interstate_Traffic_Volume.csv")
+
+record_date <-  as.Date(traffic_volume_raw$date_time, format = "%Y-%m-%d %H:%M:%S")
+traffic_volume_raw =data.frame(traffic_volume_raw ,record_date)
+
+date_time.1 <-  strptime(traffic_volume_raw$date_time, format = "%Y-%m-%d %H:%M:%S")
+traffic_volume_raw =data.frame(traffic_volume_raw ,date_time.1)
+
+week_name <-  weekdays.Date(traffic_volume_raw$record_date)
+traffic_volume_raw =data.frame(traffic_volume_raw ,week_name)
+
+month_name <-  months.Date(traffic_volume_raw$record_date)
+traffic_volume_raw =data.frame(traffic_volume_raw ,month_name)
+
+
+
+#log_traffic_volume <-  ifelse(traffic_volume_raw$traffic_volume > 1 ,log(traffic_volume_raw$traffic_volume) ,0)
+#traffic_volume_raw =data.frame(traffic_volume_raw ,log_traffic_volume)
+
+summary(traffic_volume_raw)
+gg_miss_var(traffic_volume_raw)
+
+```
+
+From the above plot, we can see that there is no missing value in existing records. But since data volume is huge, let's analyse if obervation for any date or month is missing.
+
+
+```{r  Splitting dataframe}
+
+traffic_volume_2013 = traffic_volume_raw %>% filter( date_time.1 >= "2012-10-01 00:00:00"  & date_time.1 < "2013-10-01 00:00:00")
+traffic_volume_2014 = traffic_volume_raw %>% filter( date_time.1 >= "2013-10-01 00:00:00"  & date_time.1 < "2014-10-01 00:00:00")
+traffic_volume_2015 = traffic_volume_raw %>% filter( date_time.1 >= "2014-10-01 00:00:00"  & date_time.1 < "2015-10-01 00:00:00")
+traffic_volume_2016 = traffic_volume_raw %>% filter( date_time.1 >= "2015-10-01 00:00:00"  & date_time.1 < "2016-10-01 00:00:00")
+traffic_volume_2017 = traffic_volume_raw %>% filter( date_time.1 >= "2016-10-01 00:00:00"  & date_time.1 < "2017-10-01 00:00:00")
+traffic_volume_2018 = traffic_volume_raw %>% filter( date_time.1 >= "2017-10-01 00:00:00"  & date_time.1 < "2018-10-01 00:00:00")
+
+print (paste0("Number of observation for Oct, 2012 Oct to Sep, 2013 Sep is : " , count(traffic_volume_2013) ))
+print (paste0("Number of observation for Oct, 2013 Oct to Sep, 2014 Sep is : " , count(traffic_volume_2014) ))
+print (paste0("Number of observation for Oct, 2014 Oct to Sep, 2015 Sep is : " , count(traffic_volume_2015) ))
+print (paste0("Number of observation for Oct, 2015 Oct to Sep, 2016 Sep is : " , count(traffic_volume_2016) ))
+print (paste0("Number of observation for Oct, 2016 Oct to Sep, 2017 Sep is : " , count(traffic_volume_2017) ))
+print (paste0("Number of observation for Oct, 2017 Oct to Sep, 2018 Sep is : " , count(traffic_volume_2018) ))
+
+```
+
+We know that for an year there can be 8760 records (or 8784 for 2016 being a leap year).
+By looking at data for 2014, 2015, it seems a lot of observations are missing.
+2013 being very old compared to latest data, we decided to ignore this year's data as well.
+
+So, we will go ahead with data for 2016, 2017 and 2018 to analyse our use case.
+
+
+```{r  Basic EDA}
+
+##Temperature is in Kelvin. So the temperature range is 200 +
+      ggplot(traffic_volume_raw, aes(x = holiday , y = traffic_volume )) +  geom_bar(stat = "identity")   + xlab("Holiday") + ylab("Traffic Volume") +  ggtitle("Holiday/Non-Holiday vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+      holidays <- traffic_volume_raw %>% filter(holiday != 'None')
+      ggplot(holidays, aes(x= holiday, y = traffic_volume )) +  geom_bar(stat = "identity")  + xlab("Holiday") + ylab("Traffic Volume") +  ggtitle("Holiday vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+      ggplot(traffic_volume_raw, aes(x = temp , y = traffic_volume )) +  geom_point()  + xlab("Temperature") + ylab("Traffic Volume")+  ggtitle("Temperature vs Traffic Volume") + xlim(240,310)
+      ggplot(traffic_volume_raw, aes(x = rain_1h , y = traffic_volume )) +  geom_point()  + xlab("Amount of Rain in current hour") + ylab("Traffic Volume")+  ggtitle("Rain vs Traffic Volume")  + xlim(0,30)
+      ggplot(traffic_volume_raw, aes(x = snow_1h , y = traffic_volume )) +  geom_point()  + xlab("Amount of Snow in current hour") + ylab("Traffic Volume")+  ggtitle("Snow vs Traffic Volume") + xlim(0,0.1)
+      ggplot(traffic_volume_raw, aes(x = clouds_all , y = traffic_volume )) +  geom_bar(stat = "identity")   + xlab("Percentage of Cloud Cover") + ylab("Traffic Volume")+  ggtitle("Cloud Cover vs Traffic Volume") 
+      ggplot(traffic_volume_raw, aes(x= reorder(weather_main, -traffic_volume)  , y = traffic_volume )) +  geom_bar(stat = "identity")  + xlab("Weather") + ylab("Traffic Volume") +  ggtitle("Weather vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+      ggplot(traffic_volume_raw, aes(x= reorder(weather_description, -traffic_volume) , y = traffic_volume )) + geom_bar(stat = "identity")  + xlab("Weather Description") + ylab("Traffic Volume") +  ggtitle("Weather vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+      ggplot(traffic_volume_raw, aes(x= reorder(week_name, -traffic_volume), y = traffic_volume )) +  geom_bar(stat = "identity")  + xlab("Week Name") + ylab("Traffic Volume") +  ggtitle("Week vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+      ggplot(traffic_volume_raw, aes(x= reorder(month_name, traffic_volume), y = traffic_volume )) +  geom_bar(stat = "identity")  + xlab("Month") + ylab("Traffic Volume") +  ggtitle("Month vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+      ggplot(traffic_volume_raw, aes(x= hour(date_time.1), y = traffic_volume )) +  geom_bar(stat = "identity")  + xlab("Hour of Day") + ylab("Traffic Volume") +  ggtitle("Hour of Day vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+
+snow = traffic_volume_raw %>% filter(snow_1h > 0)
+print ("Summary of data with non zero snow variable is below:"  )
+summary(snow)  
+
+```
+
+
+
+Only 63 records has snow value greater than 0. This looks like data collection error because snow for only 63 days in Minneapolis state (over 6 years) does not look real. 
+So, we can remove this variable from analysis to avoid error prone extrapolating.
+
+Also, we saw that 2017 and 2018 had more than 8760 records. By analysing data, we found some duplicate records. Hence, we will create final dataframe after removing those duplicates.
+
+
+```{r  creating final dataframe and basic EDA on that}
+
+#traffic_volume_bind = rbind(traffic_volume_2016[,c(1:4,8,9,10,11)], traffic_volume_2017[,c(1:4,8,9,10,11)], traffic_volume_2018[,c(1:4,8,9,10,11)])
+traffic_volume_bind = rbind(traffic_volume_2016[,c(1:3,5:7,9:13)], traffic_volume_2017[,c(1:3,5:7,9:13)], traffic_volume_2018[,c(1:3,5:7,9:13)])
+
+traffic_volume_final <- unique(traffic_volume_bind)
+
+```
+
+
+
+#### c.	Stationary / Non-Stationary 
+
+```{r Stationary / Non-Stationary }
+
+estimate = plotts.sample.wge(traffic_volume_final$traffic_volume,lag.max = 100)
+
+```
+
+We see from the Spectral densities plot that there exist seasonal trend in the data. Also, the ACF's are damping exponentially. 
+
+We see seasonality of 24, 12, 7 in the data. So, data is not independent of time. Daily mean, weekly mean can vary over time based on month of the year. Hence, this model is non-stationary.
+
+However, since the realization is really clumsy to check for any seasonality in the data, let's check by picking less records from different year's dataset.
+
+#### d.	ACFs and Spectral Densities just to explore
+
+```{r ACFs and Spectral Densities}
+acf(traffic_volume_final$traffic_volume)
+
+print ("Realization of hourly data in chunks of 20 days are below for different years"  )
+
+realization1 = plotts.wge(traffic_volume_2016$traffic_volume[1:480])
+realization1 = plotts.wge(traffic_volume_2016$traffic_volume[481:960])
+#parzen_window1 = parzen.wge(traffic_volume_2016$traffic_volume[1:240],plot = "TRUE")
+
+realization2 = plotts.wge(traffic_volume_2017$traffic_volume[1:480])
+realization2 = plotts.wge(traffic_volume_2017$traffic_volume[481:960])
+#parzen_window2 = parzen.wge(traffic_volume_2017$traffic_volume[1:240],plot = "TRUE")
+
+realization3 = plotts.wge(traffic_volume_2018$traffic_volume[1:480])
+realization3 = plotts.wge(traffic_volume_2018$traffic_volume[481:960])
+
+
+#parzen_window3 = parzen.wge(traffic_volume_2018$traffic_volume[1:240],plot = "TRUE")
+
+
+```
+
+
+From the above plots, we can see that values are almost getting repeated every 24 hours. Also, we see that after every 5 days, traffic is little less for 2 days. This is another trend. Based on our domain knowledge when we know people travel more during weekdays for work (mostly 1 person per vehicle where as weekend trips are mostly in groups)
+
+
+
+#### e.	At least 2 candidate ARMA / ARIMA models
+
+```{r ARMA / ARIMA model , echo = TRUE}
+
+aic5.wge(traffic_volume_final$traffic_volume, type = "aic")
+aic5.wge(traffic_volume_final$traffic_volume, type = "bic")
+
+
+
+```
+
+
+AIC estimate picked ARMA(5,1) as best model.
+Here we are estimating next 72 observation which is forecast for last 3 days.
+
+
+#### ARMA model
+
+```{r Fit model (ARMA)}
+
+fit_arma = est.arma.wge(traffic_volume_final$traffic_volume, p=5,q=1)
+forecast_ar5_ma1 = fore.arma.wge(traffic_volume_final$traffic_volume, phi = fit_arma$phi , theta= fit_arma$theta, n.ahead = 72, plot=TRUE, lastn=TRUE)
+
+plot(traffic_volume_final$traffic_volume[(length(traffic_volume_final$traffic_volume)-71):length(traffic_volume_final$traffic_volume)] , type = 'l')
+lines(seq(1,72),forecast_ar5_ma1$f, col = "red")
+
+ASE_arma = mean((traffic_volume_final$traffic_volume[(length(traffic_volume_final$traffic_volume)-71):length(traffic_volume_final$traffic_volume)] - forecast_ar5_ma1$f)^2)
+
+print (paste0("ASE for above ARMA(5,1) model is : " , ASE_arma ))   
+
+
+
+```
+
+
+
+#### Seasonal model
+
+```{r Fit model (Seasonal)}
+
+#factor.wge(phi = c(rep(0,6),1)) # factor table (1-B^7)
+
+fit_seasonal = est.ar.wge(traffic_volume_final$traffic_volume, p=26, type = "burg")
+
+factor.wge(phi = c(rep(0,23),1)) # factor table (1-B^24)
+
+
+dif_seasonal_24 = artrans.wge(traffic_volume_final$traffic_volume,c(rep(0,23),1))
+
+acf(dif_seasonal_24)
+plotts.wge(dif_seasonal_24)
+
+aic5.wge(dif_seasonal_24)
+
+
+fit_seasonal = est.arma.wge(dif_seasonal_24, p=5,q=1)
+forecast_seasonal = fore.aruma.wge(traffic_volume_final$traffic_volume, phi = fit_seasonal$phi, theta=fit_seasonal$theta, d = 0, s = 24, n.ahead = 72, plot=TRUE, lastn=TRUE)
+
+plot(traffic_volume_final$traffic_volume[(length(traffic_volume_final$traffic_volume)-71):length(traffic_volume_final$traffic_volume)] , type = 'l')
+lines(seq(1,72),forecast_seasonal$f, col = "red")
+
+
+ASE_seasonal = mean((traffic_volume_final$traffic_volume[(length(traffic_volume_final$traffic_volume)-71):length(traffic_volume_final$traffic_volume)] - forecast_seasonal$f)^2)
+
+print (paste0("ASE for above seasonal model is : " , ASE_seasonal ))    
+
+```
+
+
+
+
+#### Multivariate time series analysis
+
+```{r Multivariate time series analysis}
+
+ksfit = lm(traffic_volume~temp+rain_1h+clouds_all, data=traffic_volume_final)
+phi = aic.wge(ksfit$residuals)
+
+fit_multivariate = arima(traffic_volume_final$traffic_volume, order=c(phi$p, 0, phi$q), xreg=traffic_volume_final[,c(2:4)])
+fit_multivariate
+
+acf(fit_multivariate$residuals)
+ltest = ljung.wge(fit_multivariate$residuals,phi$p,phi$q)
+ltest$pval
+
+
+ltest_48 = ljung.wge(fit_multivariate$residuals,phi$p,phi$q,K=48)
+ltest_48$pval
+
+
+## With time component
+
+t=1:29486
+
+ksfit = lm(traffic_volume~t+temp+rain_1h+clouds_all, data=traffic_volume_final)
+phi = aic.wge(ksfit$residuals)
+
+fit_multivariate = arima(traffic_volume_final$traffic_volume, order=c(phi$p, 0, phi$q), xreg=cbind(t,traffic_volume_final[,c(2:4)])  )
+fit_multivariate
+
+
+acf(fit_multivariate$residuals)
+ltest = ljung.wge(fit_multivariate$residuals,phi$p,phi$q)
+ltest$pval
+
+
+ltest_48 = ljung.wge(fit_multivariate$residuals,K=48)
+ltest_48$pval
+
+
+## Only using tempertaure because it was significant
+
+ksfit = lm(traffic_volume~temp, data=traffic_volume_final)
+phi = aic.wge(ksfit$residuals)
+
+fit_multivariate = arima(traffic_volume_final$traffic_volume, order=c(phi$p, 0, phi$q), xreg=cbind(traffic_volume_final[,2])  )
+fit_multivariate
+
+
+acf(fit_multivariate$residuals)
+ltest = ljung.wge(fit_multivariate$residuals,phi$p,phi$q)
+ltest$pval
+
+
+ltest_48 = ljung.wge(fit_multivariate$residuals,phi$p,phi$q,K=48)
+ltest_48$pval
+
+
+#last168 = data.frame(temp = traffic_volume_final$temp[(length(traffic_volume_final$traffic_volume)-167):length(traffic_volume_final$traffic_volume)], rain_1h = traffic_volume_final$rain_1h[(length(traffic_volume_final$traffic_volume)-167):length(traffic_volume_final$traffic_volume)])
+#get predictions
+#pred_traffic = predict(fit_multivariate,newxreg = last168)
+
+#ASE_multi = mean((traffic_volume_final$traffic_volume[(length(traffic_volume_final$traffic_volume)-167):length(traffic_volume_final$traffic_volume)] - pred_traffic$pred)^2,na.rm = TRUE)
+
+#print (paste0("ASE for above multivariate model is : " , ASE_multi ))   
+
+
+```
+
+From Ljung Box Test and from ACF of residuals (for all combinations of variables we tried), it is clear that the residuals are not white noise.
+Hence we decided not to use this model.
+
+
+So, now let's analyse NN model.
+
+
+```{r Neural Networks}
+## Used less records for NN as it was taking huge time for analysis.
+
+traffic_volume_data_for_NN = traffic_volume_final %>% filter( record_date >= "2018-09-15")
+
+traffic_volume_xreg = data.frame(temp = ts(traffic_volume_data_for_NN$temp), rain_1h = ts(traffic_volume_data_for_NN$rain_1h), clouds_all = ts(traffic_volume_data_for_NN$clouds_all))
+
+output = ts(traffic_volume_data_for_NN$traffic_volume[1:(length(traffic_volume_data_for_NN$traffic_volume)-72)])
+
+fit_nn = mlp(output, xreg = traffic_volume_xreg)
+plot(fit_nn)
+
+pred_nn = forecast::forecast(fit_nn, h = 72, xreg = traffic_volume_xreg)
+plot(pred_nn)
+
+plot(traffic_volume_data_for_NN$traffic_volume[(length(traffic_volume_data_for_NN$traffic_volume)-71):length(traffic_volume_data_for_NN$traffic_volume)] , type = 'l')
+lines(seq(1,72),pred_nn$mean, col = "red")
+
+
+ASE_nn = mean((traffic_volume_data_for_NN$traffic_volume[(length(traffic_volume_data_for_NN$traffic_volume)-71):length(traffic_volume_data_for_NN$traffic_volume)] - pred_nn$mean)^2)
+
+print (paste0("ASE for above NN model is : " , ASE_nn ))    
+ 
+
+```
+
+
+Let's analyse VAR model using the small dataset we created for NN model.
+
+
+```{r VAR model}
+
+VARselect(traffic_volume_xreg,lag.max=10,type="const", season=24,exogen=NULL)
+lsfit = VAR(traffic_volume_xreg, p=5, type="const")
+preds=predict(lsfit,n.ahead=72)
+
+```
+
+
+
+
+
+Finally since we have seen weekdays are mostly contributing to traffic volume, for simplicity, we have decided to use the data set that belongs to weekdays. Because we have seen that data our model with seasonality factor of 24 is the best model among others.
+
+So, even though our model is not super helpful for weeknds but it is definitely going to be a huge help for weekdays forecast.
+
+```{r Fit model (Seasonal) with weekdays data}
+
+traffic_volume_final_weekday <- traffic_volume_final %>% filter( week_name != 'Sunday' & week_name != 'Saturday')
+
+#      ggplot(traffic_volume_final_weekday, aes(x= reorder(week_name, -traffic_volume), y = traffic_volume )) +  geom_bar(stat = "identity")  + xlab("Week Name") + ylab("Traffic Volume") +  ggtitle("Week vs Traffic Volume") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8))
+
+
+weekday_dif_seasonal_24 = artrans.wge(traffic_volume_final_weekday$traffic_volume,c(rep(0,23),1))
+
+acf(weekday_dif_seasonal_24)
+plotts.wge(weekday_dif_seasonal_24)
+
+aic5.wge(weekday_dif_seasonal_24)
+
+
+weekday_fit_seasonal = est.arma.wge(weekday_dif_seasonal_24, p=5,q=1)
+weekday_forecast_seasonal = fore.aruma.wge(traffic_volume_final_weekday$traffic_volume, phi = weekday_fit_seasonal$phi, theta=weekday_fit_seasonal$theta, d = 0, s = 24, n.ahead = 72, plot=TRUE, lastn=TRUE)
+
+plot(traffic_volume_final_weekday$traffic_volume[(length(traffic_volume_final_weekday$traffic_volume)-71):length(traffic_volume_final_weekday$traffic_volume)] , type = 'l')
+lines(seq(1,72),weekday_forecast_seasonal$f, col = "red")
+
+
+weekday_ASE_seasonal = mean((traffic_volume_final_weekday$traffic_volume[(length(traffic_volume_final_weekday$traffic_volume)-71):length(traffic_volume_final_weekday$traffic_volume)] - weekday_forecast_seasonal$f)^2)
+
+print (paste0("ASE for above seasonal model is : " , weekday_ASE_seasonal ))   #4727624
+
+```
+
+
+
+
+```{r Fit model (Seasonal)  data long term}
+
+forecast_seasonal_long = fore.aruma.wge(traffic_volume_final$traffic_volume, phi = fit_seasonal$phi, theta=fit_seasonal$theta, d = 0, s = 24, n.ahead = 360, plot=TRUE, lastn=TRUE)
+
+plot(traffic_volume_final$traffic_volume[(length(traffic_volume_final$traffic_volume)-359):length(traffic_volume_final$traffic_volume)] , type = 'l')
+lines(seq(1,360),forecast_seasonal_long$f, col = "red")
+
+
+ASE_seasonal = mean((traffic_volume_final$traffic_volume[(length(traffic_volume_final$traffic_volume)-359):length(traffic_volume_final_weekday$traffic_volume)] - forecast_seasonal_long$f)^2)
+
+print (paste0("ASE for above seasonal model is : " , ASE_seasonal ))   #4727624
+
+```
+

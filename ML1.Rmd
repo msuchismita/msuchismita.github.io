@@ -1,0 +1,16 @@
+---
+title: "Analysis done in Machine Learning I class"
+output: html_document
+---
+
+
+  Below are the models we built as part of Machine Learning I (Sep 2019 - Dec 2019) class in Data Science program.
+
+  Team Members:
+  
+  Aniketh Vankina  
+  Indy Dhillon   
+  Jason Rupp    
+  Suchismita Moharana    
+
+

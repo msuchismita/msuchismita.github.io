@@ -5,14 +5,13 @@ output: html_document
 
 
 
-  Current Role: Datawarehouse Engineer at Quest Global Engineering Services Pvt Ltd.
+  Current Role: Senior Data Engineer at Infosys Ltd.
 
   Current City: Austin, Texas
 
 Education: 
 
-      Master of Science in Data Science (on-going)
+      Master of Science in Data Science (2021)
 
       Bachelor of Technology in Computer Science and Engineering (2010)
 
-Hobbies: Running, Yoga
